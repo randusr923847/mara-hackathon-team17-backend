@@ -108,8 +108,6 @@ def addTask(request):
         compute_id = best_compute
         sched_time = 0   # FIGURE OUT WHEN TO RUN / TBD
 
-
-
         new_uuid = str(uuid.uuid4())
 
         while Task.objects.filter(uuid=new_uuid).exists():
@@ -122,6 +120,8 @@ def addTask(request):
             time=sched_time
         )
         task.save()
+
+        runTask(task)
 
         return JsonResponse({'success': True}, safe=False)
     else:
@@ -140,4 +140,5 @@ def runTask(task):
     resp = requests.post(f"{host}/session", headers=headers, json={"image": "python:3.9-ubuntu20.04", "clientSessionToken": "my-session"})
     session_id = resp.json().sessId
 
-    
+    resp = requests.post(f"{host}/session/{session_id}", headers=headers, json={"code": file_cont, "mode": "query"})
+    run_id = resp.json().result.runId
